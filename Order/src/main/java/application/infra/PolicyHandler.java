@@ -2,6 +2,8 @@ package application.infra;
 
 import application.config.kafka.KafkaProcessor;
 import application.domain.*;
+import application.external.*;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.naming.NameParser;
@@ -20,6 +22,8 @@ public class PolicyHandler {
 
     @Autowired
     OrderRepository orderRepository;
+    // DeliveryRepository deliveryRepository;
+
 
     @StreamListener(KafkaProcessor.INPUT)
     public void whatever(
@@ -38,255 +42,256 @@ public class PolicyHandler {
           */
     }
 
-    @StreamListener(
-        value = KafkaProcessor.INPUT,
-        condition = "headers['type']=='OrderPlaced'"
-    )
-    public void wheneverOrderPlaced_OrderSaga(
-        @Payload OrderPlaced orderPlaced,
-        @Header(KafkaHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment,
-        @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) byte[] messageKey
-    ) {
-        OrderPlaced event = orderPlaced;
-        System.out.println(
-            "\n\n##### listener OrderSaga : " + orderPlaced + "\n\n"
-        );
+    // @StreamListener(
+    //     value = KafkaProcessor.INPUT,
+    //     condition = "headers['type']=='OrderPlaced'"
+    // )
+    // public void wheneverOrderPlaced_OrderSaga(
+    //     @Payload OrderPlaced orderPlaced,
+    //     @Header(KafkaHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment,
+    //     @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) byte[] messageKey
+    // ) {
+    //     OrderPlaced event = orderPlaced;
+    //     System.out.println(
+    //         "\n\n##### listener OrderSaga : " + orderPlaced + "\n\n"
+    //     );
 
-        StartDeliveryCommand startDeliveryCommand = new StartDeliveryCommand();
-        // implement:  Map command properties from event
+    //     StartDeliveryCommand startDeliveryCommand = new StartDeliveryCommand();
+    //     // implement:  Map command properties from event
 
-        deliveryRepository
-            .findById(
-                // implement: Set the Delivery Id from one of OrderPlaced event's corresponding property
+    //     deliveryRepository
+    //         .findById(
+    //             // implement: Set the Delivery Id from one of OrderPlaced event's corresponding property
 
-            )
-            .ifPresent(delivery -> {
-                delivery.startDelivery(startDeliveryCommand);
-            });
-        DecreaseStockCommand decreaseStockCommand = new DecreaseStockCommand();
-        // implement:  Map command properties from event
+    //         )
+    //         .ifPresent(delivery -> {
+    //             delivery.startDelivery(startDeliveryCommand);
+    //         });
+    //     DecreaseStockCommand decreaseStockCommand = new DecreaseStockCommand();
+    //     // implement:  Map command properties from event
 
-        productRepository
-            .findById(
-                // implement: Set the Product Id from one of OrderPlaced event's corresponding property
+    //     productRepository
+    //         .findById(
+    //             // implement: Set the Product Id from one of OrderPlaced event's corresponding property
 
-            )
-            .ifPresent(product -> {
-                product.decreaseStock(decreaseStockCommand);
-            });
-        CancelDeliveryCommand cancelDeliveryCommand = new CancelDeliveryCommand();
-        // implement:  Map command properties from event
+    //         )
+    //         .ifPresent(product -> {
+    //             product.decreaseStock(decreaseStockCommand);
+    //         });
+    //     CancelDeliveryCommand cancelDeliveryCommand = new CancelDeliveryCommand();
+    //     // implement:  Map command properties from event
 
-        deliveryRepository
-            .findById(
-                // implement: Set the Delivery Id from one of OrderPlaced event's corresponding property
+    //     // deliveryRepository
+    //     //     .findById(
+    //     //         // implement: Set the Delivery Id from one of OrderPlaced event's corresponding property
 
-            )
-            .ifPresent(delivery -> {
-                delivery.cancelDelivery(cancelDeliveryCommand);
-            });
-        UpdateStatusCommand updateStatusCommand = new UpdateStatusCommand();
-        // implement:  Map command properties from event
+    //     //     )
+    //     //     .ifPresent(delivery -> {
+    //     //         delivery.cancelDelivery(cancelDeliveryCommand);
+    //     //     });
 
-        orderRepository
-            .findById(
-                // implement: Set the Order Id from one of OrderPlaced event's corresponding property
+    //     UpdateStatusCommand updateStatusCommand = new UpdateStatusCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(order -> {
-                order.updateStatus(updateStatusCommand);
-            });
+    //     // orderRepository
+    //     //     .findById(
+    //     //         // implement: Set the Order Id from one of OrderPlaced event's corresponding property
 
-        // Manual Offset Commit //
-        acknowledgment.acknowledge();
-    }
+    //     //     )
+    //     //     .ifPresent(order -> {
+    //     //         order.updateStatus(updateStatusCommand);
+    //     //     });
 
-    @StreamListener(
-        value = KafkaProcessor.INPUT,
-        condition = "headers['type']=='DeliveryStarted'"
-    )
-    public void wheneverDeliveryStarted_OrderSaga(
-        @Payload DeliveryStarted deliveryStarted,
-        @Header(KafkaHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment,
-        @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) byte[] messageKey
-    ) {
-        DeliveryStarted event = deliveryStarted;
-        System.out.println(
-            "\n\n##### listener OrderSaga : " + deliveryStarted + "\n\n"
-        );
+    //     // Manual Offset Commit //
+    //     acknowledgment.acknowledge();
+    // }
 
-        StartDeliveryCommand startDeliveryCommand = new StartDeliveryCommand();
-        // implement:  Map command properties from event
+    // @StreamListener(
+    //     value = KafkaProcessor.INPUT,
+    //     condition = "headers['type']=='DeliveryStarted'"
+    // )
+    // public void wheneverDeliveryStarted_OrderSaga(
+    //     @Payload DeliveryStarted deliveryStarted,
+    //     @Header(KafkaHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment,
+    //     @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) byte[] messageKey
+    // ) {
+    //     DeliveryStarted event = deliveryStarted;
+    //     System.out.println(
+    //         "\n\n##### listener OrderSaga : " + deliveryStarted + "\n\n"
+    //     );
 
-        deliveryRepository
-            .findById(
-                // implement: Set the Delivery Id from one of DeliveryStarted event's corresponding property
+    //     StartDeliveryCommand startDeliveryCommand = new StartDeliveryCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(delivery -> {
-                delivery.startDelivery(startDeliveryCommand);
-            });
-        DecreaseStockCommand decreaseStockCommand = new DecreaseStockCommand();
-        // implement:  Map command properties from event
+    //     deliveryRepository
+    //         .findById(
+    //             // implement: Set the Delivery Id from one of DeliveryStarted event's corresponding property
 
-        productRepository
-            .findById(
-                // implement: Set the Product Id from one of DeliveryStarted event's corresponding property
+    //         )
+    //         .ifPresent(delivery -> {
+    //             delivery.startDelivery(startDeliveryCommand);
+    //         });
+    //     DecreaseStockCommand decreaseStockCommand = new DecreaseStockCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(product -> {
-                product.decreaseStock(decreaseStockCommand);
-            });
-        CancelDeliveryCommand cancelDeliveryCommand = new CancelDeliveryCommand();
-        // implement:  Map command properties from event
+    //     productRepository
+    //         .findById(
+    //             // implement: Set the Product Id from one of DeliveryStarted event's corresponding property
 
-        deliveryRepository
-            .findById(
-                // implement: Set the Delivery Id from one of DeliveryStarted event's corresponding property
+    //         )
+    //         .ifPresent(product -> {
+    //             product.decreaseStock(decreaseStockCommand);
+    //         });
+    //     CancelDeliveryCommand cancelDeliveryCommand = new CancelDeliveryCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(delivery -> {
-                delivery.cancelDelivery(cancelDeliveryCommand);
-            });
-        UpdateStatusCommand updateStatusCommand = new UpdateStatusCommand();
-        // implement:  Map command properties from event
+    //     deliveryRepository
+    //         .findById(
+    //             // implement: Set the Delivery Id from one of DeliveryStarted event's corresponding property
 
-        orderRepository
-            .findById(
-                // implement: Set the Order Id from one of DeliveryStarted event's corresponding property
+    //         )
+    //         .ifPresent(delivery -> {
+    //             delivery.cancelDelivery(cancelDeliveryCommand);
+    //         });
+    //     UpdateStatusCommand updateStatusCommand = new UpdateStatusCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(order -> {
-                order.updateStatus(updateStatusCommand);
-            });
+    //     orderRepository
+    //         .findById(
+    //             // implement: Set the Order Id from one of DeliveryStarted event's corresponding property
 
-        // Manual Offset Commit //
-        acknowledgment.acknowledge();
-    }
+    //         )
+    //         .ifPresent(order -> {
+    //             order.updateStatus(updateStatusCommand);
+    //         });
 
-    @StreamListener(
-        value = KafkaProcessor.INPUT,
-        condition = "headers['type']=='StockDecreased'"
-    )
-    public void wheneverStockDecreased_OrderSaga(
-        @Payload StockDecreased stockDecreased,
-        @Header(KafkaHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment,
-        @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) byte[] messageKey
-    ) {
-        StockDecreased event = stockDecreased;
-        System.out.println(
-            "\n\n##### listener OrderSaga : " + stockDecreased + "\n\n"
-        );
+    //     // Manual Offset Commit //
+    //     acknowledgment.acknowledge();
+    // }
 
-        StartDeliveryCommand startDeliveryCommand = new StartDeliveryCommand();
-        // implement:  Map command properties from event
+    // @StreamListener(
+    //     value = KafkaProcessor.INPUT,
+    //     condition = "headers['type']=='StockDecreased'"
+    // )
+    // public void wheneverStockDecreased_OrderSaga(
+    //     @Payload StockDecreased stockDecreased,
+    //     @Header(KafkaHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment,
+    //     @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) byte[] messageKey
+    // ) {
+    //     StockDecreased event = stockDecreased;
+    //     System.out.println(
+    //         "\n\n##### listener OrderSaga : " + stockDecreased + "\n\n"
+    //     );
 
-        deliveryRepository
-            .findById(
-                // implement: Set the Delivery Id from one of StockDecreased event's corresponding property
+    //     StartDeliveryCommand startDeliveryCommand = new StartDeliveryCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(delivery -> {
-                delivery.startDelivery(startDeliveryCommand);
-            });
-        DecreaseStockCommand decreaseStockCommand = new DecreaseStockCommand();
-        // implement:  Map command properties from event
+    //     deliveryRepository
+    //         .findById(
+    //             // implement: Set the Delivery Id from one of StockDecreased event's corresponding property
 
-        productRepository
-            .findById(
-                // implement: Set the Product Id from one of StockDecreased event's corresponding property
+    //         )
+    //         .ifPresent(delivery -> {
+    //             delivery.startDelivery(startDeliveryCommand);
+    //         });
+    //     DecreaseStockCommand decreaseStockCommand = new DecreaseStockCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(product -> {
-                product.decreaseStock(decreaseStockCommand);
-            });
-        CancelDeliveryCommand cancelDeliveryCommand = new CancelDeliveryCommand();
-        // implement:  Map command properties from event
+    //     productRepository
+    //         .findById(
+    //             // implement: Set the Product Id from one of StockDecreased event's corresponding property
 
-        deliveryRepository
-            .findById(
-                // implement: Set the Delivery Id from one of StockDecreased event's corresponding property
+    //         )
+    //         .ifPresent(product -> {
+    //             product.decreaseStock(decreaseStockCommand);
+    //         });
+    //     CancelDeliveryCommand cancelDeliveryCommand = new CancelDeliveryCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(delivery -> {
-                delivery.cancelDelivery(cancelDeliveryCommand);
-            });
-        UpdateStatusCommand updateStatusCommand = new UpdateStatusCommand();
-        // implement:  Map command properties from event
+    //     deliveryRepository
+    //         .findById(
+    //             // implement: Set the Delivery Id from one of StockDecreased event's corresponding property
 
-        orderRepository
-            .findById(
-                // implement: Set the Order Id from one of StockDecreased event's corresponding property
+    //         )
+    //         .ifPresent(delivery -> {
+    //             delivery.cancelDelivery(cancelDeliveryCommand);
+    //         });
+    //     UpdateStatusCommand updateStatusCommand = new UpdateStatusCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(order -> {
-                order.updateStatus(updateStatusCommand);
-            });
+    //     orderRepository
+    //         .findById(
+    //             // implement: Set the Order Id from one of StockDecreased event's corresponding property
 
-        // Manual Offset Commit //
-        acknowledgment.acknowledge();
-    }
+    //         )
+    //         .ifPresent(order -> {
+    //             order.updateStatus(updateStatusCommand);
+    //         });
 
-    @StreamListener(
-        value = KafkaProcessor.INPUT,
-        condition = "headers['type']=='OrderCompleted'"
-    )
-    public void wheneverOrderCompleted_OrderSaga(
-        @Payload OrderCompleted orderCompleted,
-        @Header(KafkaHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment,
-        @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) byte[] messageKey
-    ) {
-        OrderCompleted event = orderCompleted;
-        System.out.println(
-            "\n\n##### listener OrderSaga : " + orderCompleted + "\n\n"
-        );
+    //     // Manual Offset Commit //
+    //     acknowledgment.acknowledge();
+    // }
 
-        StartDeliveryCommand startDeliveryCommand = new StartDeliveryCommand();
-        // implement:  Map command properties from event
+    // @StreamListener(
+    //     value = KafkaProcessor.INPUT,
+    //     condition = "headers['type']=='OrderCompleted'"
+    // )
+    // public void wheneverOrderCompleted_OrderSaga(
+    //     @Payload OrderCompleted orderCompleted,
+    //     @Header(KafkaHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment,
+    //     @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) byte[] messageKey
+    // ) {
+    //     OrderCompleted event = orderCompleted;
+    //     System.out.println(
+    //         "\n\n##### listener OrderSaga : " + orderCompleted + "\n\n"
+    //     );
 
-        deliveryRepository
-            .findById(
-                // implement: Set the Delivery Id from one of OrderCompleted event's corresponding property
+    //     StartDeliveryCommand startDeliveryCommand = new StartDeliveryCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(delivery -> {
-                delivery.startDelivery(startDeliveryCommand);
-            });
-        DecreaseStockCommand decreaseStockCommand = new DecreaseStockCommand();
-        // implement:  Map command properties from event
+    //     deliveryRepository
+    //         .findById(
+    //             // implement: Set the Delivery Id from one of OrderCompleted event's corresponding property
 
-        productRepository
-            .findById(
-                // implement: Set the Product Id from one of OrderCompleted event's corresponding property
+    //         )
+    //         .ifPresent(delivery -> {
+    //             delivery.startDelivery(startDeliveryCommand);
+    //         });
+    //     DecreaseStockCommand decreaseStockCommand = new DecreaseStockCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(product -> {
-                product.decreaseStock(decreaseStockCommand);
-            });
-        CancelDeliveryCommand cancelDeliveryCommand = new CancelDeliveryCommand();
-        // implement:  Map command properties from event
+    //     productRepository
+    //         .findById(
+    //             // implement: Set the Product Id from one of OrderCompleted event's corresponding property
 
-        deliveryRepository
-            .findById(
-                // implement: Set the Delivery Id from one of OrderCompleted event's corresponding property
+    //         )
+    //         .ifPresent(product -> {
+    //             product.decreaseStock(decreaseStockCommand);
+    //         });
+    //     CancelDeliveryCommand cancelDeliveryCommand = new CancelDeliveryCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(delivery -> {
-                delivery.cancelDelivery(cancelDeliveryCommand);
-            });
-        UpdateStatusCommand updateStatusCommand = new UpdateStatusCommand();
-        // implement:  Map command properties from event
+    //     deliveryRepository
+    //         .findById(
+    //             // implement: Set the Delivery Id from one of OrderCompleted event's corresponding property
 
-        orderRepository
-            .findById(
-                // implement: Set the Order Id from one of OrderCompleted event's corresponding property
+    //         )
+    //         .ifPresent(delivery -> {
+    //             delivery.cancelDelivery(cancelDeliveryCommand);
+    //         });
+    //     UpdateStatusCommand updateStatusCommand = new UpdateStatusCommand();
+    //     // implement:  Map command properties from event
 
-            )
-            .ifPresent(order -> {
-                order.updateStatus(updateStatusCommand);
-            });
+    //     orderRepository
+    //         .findById(
+    //             // implement: Set the Order Id from one of OrderCompleted event's corresponding property
 
-        // Manual Offset Commit //
-        acknowledgment.acknowledge();
-    }
+    //         )
+    //         .ifPresent(order -> {
+    //             order.updateStatus(updateStatusCommand);
+    //         });
+
+    //     // Manual Offset Commit //
+    //     acknowledgment.acknowledge();
+    // }
 }
